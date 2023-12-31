@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "target": "es2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+      "module": "commonjs",
+      "typeRoots": ["./node_modules/@types", "./types"],
+      "outDir": "./dist",
+      "allowSyntheticDefaultImports": true /* Allow 'import x from y' when a module doesn't have a default export. */,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      /* Checking / Linting*/
+      "strict": true,
+      "strictNullChecks": true /* When type checking, take into account 'null' and 'undefined'. */,
+      "strictFunctionTypes": true /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noFallthroughCasesInSwitch": true,
+      "skipLibCheck": true
+    },
+    "exclude": ["node_modules"],
+  }
+  
