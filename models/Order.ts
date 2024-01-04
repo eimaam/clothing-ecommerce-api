@@ -1,38 +1,31 @@
 // server/models/Order.ts
 
-import mongoose, { Schema, Document } from 'mongoose';
-
+import mongoose, { Schema, Document } from "mongoose";
+import { ShippingType } from "../types";
 interface OrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
 }
-
-enum Status {
-    "PENDING" = "pending",
-    "SHIPPED" = "shipped",
-    "DELIVERED" = "delivered",
-    "CANCELED" = "cancelled",
-}
-
 interface Order extends Document {
   user: mongoose.Types.ObjectId;
   items: OrderItem[];
   total: number;
-  status: string; 
+  status: string;
+  shippingType: ShippingType;
   createdAt: Date;
 }
 
 const orderSchema = new Schema<Order>({
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
+    ref: "User", // Reference to the User model
     required: true,
   },
   items: [
     {
       product: {
         type: Schema.Types.ObjectId,
-        ref: 'Product', // Reference to the Product model
+        ref: "Product", // Reference to the Product model
         required: true,
       },
       quantity: {
@@ -49,8 +42,14 @@ const orderSchema = new Schema<Order>({
   },
   status: {
     type: String,
-    enum: ['pending', 'shipped', 'delivered', 'cancelled'], 
-    default: 'pending',
+    enum: ["pending", "shipped", "delivered", "cancelled"],
+    default: "pending",
+  },
+  shippingType: {
+    type: String,
+    required: true,
+    enum: ["in_store", "standard",  "express"],
+    default: ShippingType.IN_STORE,
   },
   createdAt: {
     type: Date,
@@ -58,5 +57,5 @@ const orderSchema = new Schema<Order>({
   },
 });
 
-export const Order = mongoose.models.Order || mongoose.model<Order>('Order', orderSchema);
-
+export const Order =
+  mongoose.models.Order || mongoose.model<Order>("Order", orderSchema);

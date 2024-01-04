@@ -1,5 +1,3 @@
-// server/models/User.ts
-
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -74,7 +72,7 @@ const userSchema = new Schema<IUser>({
 });
 
 // Hash the password before saving to the database
-userSchema.pre<User>('save', async function (next) {
+userSchema.pre<IUser>('save', async function (next) {
   try {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(this.password, saltRounds);
