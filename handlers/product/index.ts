@@ -73,8 +73,8 @@ export class Products {
       }
 
       res.status(200).json({
-        status: "ok",
         message: "All products/items fetched",
+        "total products": products.length,
         products,
       });
     } catch (error) {
@@ -159,17 +159,16 @@ export class Products {
       const product = await Product.findByIdAndDelete(productId);
 
       if (!product) {
-        return res.status(400).json({ message: "Product/Item not found" });
+        return res
+          .status(400)
+          .json({ message: "Product/Item not found", deletedProduct: product });
       }
 
-      res.status(400).json({ message: "Product/Item deleted successfully" });
+      res.status(200).json({ message: "Product/Item fetched successfully" });
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          message:
-            "Internal Server Error. There was a problem deleting the item",
-        });
+      res.status(500).json({
+        message: "Internal Server Error. There was a problem deleting the item",
+      });
     }
   }
 }
