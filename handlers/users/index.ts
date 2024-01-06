@@ -6,6 +6,10 @@ export class Users {
   static async createUser(req: Request, res: Response) {
     const { email, password, fullName } = req.body;
 
+    if (!email || !password || !fullName) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     try {
       const userData = {
         email,
@@ -33,7 +37,7 @@ export class Users {
       const user = await User.findById({ _id: userId });
 
       if (!user) {
-        res.status(404).json({ message: "User not found", userId });
+        return res.status(404).json({ message: "User not found", userId });
       }
 
       res.status(200).json({ message: "User fetched successfully", user });
@@ -65,7 +69,8 @@ export class Users {
   static async updateUser(req: Request, res: Response) {
     const { userId } = req.params;
 
-    const { fullName, password, street, city, state, zip } = req.body;
+    const { fullName, password, street, city, state, zip, addressType } =
+      req.body;
 
     try {
       function validateInputData(
@@ -73,7 +78,11 @@ export class Users {
       ): boolean {
         for (const key in data) {
           if (data[key]) {
-            if (data[key] === undefined || data[key]?.trim() === "") {
+            if (
+              data[key] === undefined ||
+              data[key] === null ||
+              data[key]?.trim() === ""
+            ) {
               return false;
             }
           }
@@ -82,24 +91,50 @@ export class Users {
       }
 
       if (
-        !validateInputData({ fullName, password, street, city, state, zip })
+        !validateInputData({
+          fullName,
+          password,
+          street,
+          city,
+          state,
+          zip,
+          addressType,
+        })
       ) {
         return res
           .status(400)
           .json({ message: "Data contains an empty or invalid field" });
       }
+      let hashedPassword;
+      if (password) {
+        const saltRounds = 10;
+        hashedPassword = await bcrypt.hash(password, saltRounds);
+      }
 
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      const data = {
+      const data: {
+        fullName: string;
+        password?: string;
+        addresses: {
+          state: string;
+          street: string;
+          city: string;
+          zip: string;
+          addressType: string;
+        };
+      } = {
         fullName,
-        password: hashedPassword,
-        street,
-        city,
-        state,
-        zip,
+        addresses: {
+          state,
+          street,
+          city,
+          zip,
+          addressType,
+        },
       };
+
+      if (hashedPassword) {
+        data.password = hashedPassword;
+      }
 
       const _id = userId;
 
@@ -124,13 +159,13 @@ export class Users {
     const { userId } = req.params;
 
     try {
-      const user = await User.findById({_id: userId});
+      const user = await User.findById({ _id: userId });
 
       if (!user) {
-        res.status(404).json({ message: "User/Account not found" });
+        return res.status(404).json({ message: "User/Account not found" });
       }
       res
-        .status(200)
+        .status(204)
         .json({ message: "Account deleted successfully", account: user });
     } catch (error) {
       res

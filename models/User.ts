@@ -16,7 +16,7 @@ interface Address {
   city: string;
   state: string;
   zip: string;
-  type: AddressType;
+  addressType: AddressType;
 }
 
 interface IUser extends Document {
@@ -69,7 +69,7 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
       },
-      type: {
+      addressType: {
         type: String,
         required: true,
       },
