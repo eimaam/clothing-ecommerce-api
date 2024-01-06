@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 enum SizeEnum {
   S = "S",
@@ -15,7 +15,7 @@ export interface IProduct extends Document {
     main: string;
     sub?: string;
   };
-  image: string[];
+  images: string[];
   colours: string[];
   availability: number;
   sizes: (SizeEnum | number)[];

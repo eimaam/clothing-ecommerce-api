@@ -32,9 +32,9 @@ export class Users {
   }
 
   static async getUserById(req: Request, res: Response) {
-    const { userId } = req.body;
+    const { userId } = req.params;
     try {
-      const user = await User.findById({ _id: userId });
+      const user = await User.findById(userId);
 
       if (!user) {
         return res.status(404).json({ message: "User not found", userId });
@@ -44,7 +44,7 @@ export class Users {
     } catch (error) {
       res
         .status(500)
-        .json({ message: "Error getting Users. Internal Server Error", error });
+        .json({ message: "Error getting User. Internal Server Error", error });
     }
   }
 
