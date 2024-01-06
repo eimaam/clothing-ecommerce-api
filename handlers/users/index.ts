@@ -121,10 +121,10 @@ export class Users {
   }
 
   static async deleteUser(req: Request, res: Response) {
-    const { userId } = req.body;
+    const { userId } = req.params;
 
     try {
-      const user = await User.findById(userId);
+      const user = await User.findById({_id: userId});
 
       if (!user) {
         res.status(404).json({ message: "User/Account not found" });
