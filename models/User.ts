@@ -1,18 +1,29 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose, { Schema, Document } from "mongoose";
+import bcrypt from "bcrypt";
 
+export enum Gender {
+  "MALE" = "m",
+  "FEMALE" = "f",
+  "OTHERS" = "o",
+}
+
+export enum AddressType {
+  "MAIN" = "main",
+  "OTHERS" = "other",
+}
 interface Address {
   street: string;
   city: string;
   state: string;
   zip: string;
+  type: AddressType;
 }
 
 interface IUser extends Document {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  gender: Gender;
   addresses: Address[];
   orders: mongoose.Types.ObjectId[];
   createdAt: Date;
@@ -29,15 +40,16 @@ const userSchema = new Schema<IUser>({
   password: {
     type: String,
     required: true,
-    minlength: 6, 
+    minlength: 6,
   },
-  firstName: {
+  fullName: {
     type: String,
     required: true,
+    trim: true,
   },
-  lastName: {
+  gender: {
     type: String,
-    required: true,
+    enum: ["m", "f", "o"],
   },
   addresses: [
     {
@@ -57,12 +69,16 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
       },
+      type: {
+        type: String,
+        required: true,
+      },
     },
   ],
   orders: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Order', // Reference to the Order model
+      ref: "Order", // Reference to the Order model
     },
   ],
   createdAt: {
@@ -72,13 +88,13 @@ const userSchema = new Schema<IUser>({
 });
 
 // Hash the password before saving to the database
-userSchema.pre<IUser>('save', async function (next) {
+userSchema.pre<IUser>("save", async function (next) {
   try {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(this.password, saltRounds);
     this.password = hashedPassword;
     next();
-  } catch (error:any) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -92,5 +108,5 @@ userSchema.methods.comparePassword = async function (userPassword: string) {
   }
 };
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
-
+export const User =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
