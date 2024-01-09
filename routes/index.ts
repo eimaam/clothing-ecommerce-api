@@ -1,6 +1,6 @@
 import { Response, Router } from "express";
-import { Orders } from "../handlers/order";
-import { Users } from "../handlers/user";
+import { Orders } from "../handlers/orders";
+import { Users } from "../handlers/users";
 import { Products } from "../handlers/product";
 import { validateInputData } from "../middlewares/validateInput.middleware";
 import { checkUser } from "../middlewares/userCheck.middleware";
