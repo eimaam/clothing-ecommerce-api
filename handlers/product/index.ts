@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { Product } from "../../models/Product";
-import { validateInputData } from "../../utils/validateInput";
 
 export class Products {
   static async createProduct(req: Request, res: Response) {
@@ -114,24 +113,6 @@ export class Products {
         sizes,
         price,
       };
-
-      if (
-        !validateInputData({
-          name,
-          description,
-          price,
-          ...colours,
-          availability,
-          mainCategory,
-          subCategory,
-          images,
-          sizes,
-        })
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Data contains an empty or invalid field" });
-      }
 
       const _id = productId;
 

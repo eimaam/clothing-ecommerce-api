@@ -67,90 +67,77 @@ export class Users {
   }
 
   static async updateUser(req: Request, res: Response) {
-    const { userId } = req.params;
-
-    const { fullName, password, street, city, state, zip, addressType } =
-      req.body;
+    const { id } = req.params;
 
     try {
-      function validateInputData(
-        data: Record<string, string | undefined>
-      ): boolean {
-        for (const key in data) {
-          if (data[key]) {
-            if (
-              data[key] === undefined ||
-              data[key] === null ||
-              data[key]?.trim() === ""
-            ) {
-              return false;
-            }
-          }
-        }
-        return true;
-      }
+      const user = await User.findById(id);
 
-      if (
-        !validateInputData({
-          fullName,
-          password,
-          street,
-          city,
-          state,
-          zip,
-          addressType,
-        })
-      ) {
+      if (user?._id.toString() !== req.body["userId"]) {
         return res
-          .status(400)
-          .json({ message: "Data contains an empty or invalid field" });
+          .status(403)
+          .json({
+            message:
+              "Access Denied. You do not have permission to update User's account",
+          });
       }
+
       let hashedPassword;
-      if (password) {
-        const saltRounds = 10;
-        hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const data: { [key: string]: any } = {};
+
+      const fieldsToUpdate = [
+        "fullName",
+        "password",
+        "street",
+        "city",
+        "state",
+        "zip",
+        "addressType",
+      ];
+
+      for (const field of fieldsToUpdate) {
+        if (field === "password" && req.body[field]) {
+          const saltRounds = 10;
+          hashedPassword = await bcrypt.hash(req.body[field], saltRounds);
+          data["password"] = hashedPassword;
+        } else if (
+          ["city", "state", "zip", "addressType", "street"].includes(field) &&
+          req.body[field]
+        ) {
+          if (!data["addresses"]) {
+            data["addresses"] = {};
+          }
+          data["addresses"] = {
+            street: req.body["street"] || user?.addresses[0]["street"],
+            city: req.body["city"] || user?.addresses[0]["city"],
+            state: req.body["state"] || user?.addresses[0]["state"],
+            zip: req.body["zip"] || user?.addresses[0]["zip"],
+            addressType:
+              req.body["addressType"] || user?.addresses[0]["addressType"],
+          };
+        } else if (req.body[field]) {
+          data[field] = req.body[field];
+        }
       }
 
-      const data: {
-        fullName: string;
-        password?: string;
-        addresses: {
-          state: string;
-          street: string;
-          city: string;
-          zip: string;
-          addressType: string;
-        };
-      } = {
-        fullName,
-        addresses: {
-          state,
-          street,
-          city,
-          zip,
-          addressType,
-        },
-      };
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: req.body["userId"] },
+        data,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
-      if (hashedPassword) {
-        data.password = hashedPassword;
-      }
-
-      const _id = userId;
-
-      const user = await User.findByIdAndUpdate(_id, data, {
-        new: true,
-        runValidators: true,
-      });
-
-      if (!user) {
+      if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
 
       return res
         .status(200)
-        .json({ message: "User updated successfully", user });
+        .json({ message: "User updated successfully", user: updatedUser });
     } catch (error) {
+      console.error("Error updating user account", error);
       res.status(500).json({ message: "Internal Server Error", error });
     }
   }

@@ -6,12 +6,11 @@ export async function validateInputData(
   next: NextFunction
 ) {
   const data = req.body;
-
   for (const key in data) {
     if (data[key] !== undefined && data[key] !== null) {
       if (
-        typeof data[key] === "string" &&
-        (data[key] as string).trim() === ""
+        (typeof data[key] === "string" && (data[key] as string).trim() === "") ||
+        (Array.isArray(data[key]) && !data[key].length)
       ) {
         return res
           .status(400)
