@@ -2,6 +2,7 @@ import { Response, Router } from "express";
 import { Orders } from "../handlers/orders";
 import { Users } from "../handlers/users";
 import { Products } from "../handlers/product";
+import { validateInputData } from "../middlewares/validateInput.middleware";
 
 export const route = Router()
 
@@ -25,4 +26,8 @@ route.patch('/product/:productId', Products.updateProduct)
 route.delete('/product/:productId', Products.deleteProduct)
 
 // orders
+route.post('/order', Orders.createOrder)
 route.get('/orders', Orders.getAllOrders)
+route.get('/order/:orderId', Orders.getOrderById)
+route.patch('/order/:orderId', validateInputData, Orders.updateOrder)
+route.delete('/order/:orderId', Orders.deleteOrder)

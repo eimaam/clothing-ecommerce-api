@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-enum SizeEnum {
+export enum SizeEnum {
   S = "S",
   M = "M",
   L = "L",
@@ -32,6 +32,10 @@ const productSchema = new Schema<IProduct>(
     description: {
       type: String,
       required: true,
+    },
+    price: {
+      type: Number,
+      required: true
     },
     colours: {
       type: [String],
