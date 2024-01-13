@@ -66,12 +66,48 @@ export class Orders {
       const order: IOrder | null = await Order.findById(orderId);
 
       if (!order) {
-        res
+        return res
           .status(400)
-          .json({ message: "No Order Found with the supplied ID" });
+          .json({
+            success: false,
+            message: "No Order Found with the supplied ID",
+          });
       }
 
-      res.status(200).json({ message: "Order fetched", order });
+      res
+        .status(200)
+        .json({ success: true, message: "Order fetched", data: order });
+    } catch (error) {
+      console.error("Error getting order", error);
+      res.status(500).json({
+        message: "Internal Server Error. Order fetching failed",
+        error,
+      });
+    }
+  }
+
+  static async getUserOrders(req: Request, res: Response) {
+    const { userId } = req.params;
+
+    try {
+      const userOrders: IOrder[] = await Order.find({ user: userId });
+
+      if (!userOrders.length) {
+        return res
+          .status(400)
+          .json({ success: false, message: "User has no order" });
+      }
+
+      // Additional check to ensure the userId matches
+      if (userId !== req.body.userId) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Access Denied. You do not have permission to access this user's cart",
+        });
+      }
+
+      res.status(200).json({ message: "Order fetched", userOrders });
     } catch (error) {
       console.error("Error getting order", error);
       res.status(500).json({
@@ -100,7 +136,7 @@ export class Orders {
 
   static async updateOrder(req: Request, res: Response) {
     const { orderId } = req.params;
-    const { userId } = req.body
+    const { userId } = req.body;
 
     try {
       const order: IOrder | null = await Order.findById(orderId);
