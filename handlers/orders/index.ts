@@ -103,7 +103,7 @@ export class Orders {
         return res.status(403).json({
           success: false,
           message:
-            "Access Denied. You do not have permission to access this user's cart",
+            "Access Denied. You do not have permission to access this user's order",
         });
       }
 
