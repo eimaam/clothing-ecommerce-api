@@ -4,6 +4,7 @@ import { Users } from "../handlers/users";
 import { Products } from "../handlers/product";
 import { validateInputData } from "../middlewares/validateInput.middleware";
 import { checkUser } from "../middlewares/userCheck.middleware";
+import { Carts } from "../handlers/cart";
 
 export const route = Router()
 
@@ -33,3 +34,11 @@ route.get('/order/:orderId', Orders.getOrderById)
 route.get('/order/user/:userId', checkUser, Orders.getUserOrders)
 route.patch('/order/:orderId', checkUser, validateInputData, Orders.updateOrder)
 route.delete('/order/:orderId', Orders.deleteOrder)
+
+// cart
+route.post('/cart', checkUser, Carts.addToCart)
+route.get('/carts', Carts.getAllCarts)
+route.get('/cart/:id', Carts.getCart)
+route.get('/cart/user/:userId', checkUser, Carts.getUserCart)
+route.patch('/cart/:id', checkUser, validateInputData, Carts.updateCart)
+route.delete('/cart/:id', Carts.deleteCart)
