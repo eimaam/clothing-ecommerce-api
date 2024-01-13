@@ -19,13 +19,14 @@ interface Address {
   addressType: AddressType;
 }
 
-interface IUser extends Document {
+export interface IUser extends Document {
   email: string;
   password: string;
   fullName: string;
   gender: Gender;
   addresses: Address[];
   orders: mongoose.Types.ObjectId[];
+  favourites: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
 
@@ -80,6 +81,12 @@ const userSchema = new Schema<IUser>({
       type: Schema.Types.ObjectId,
       ref: "Order", // Reference to the Order model
     },
+  ],
+  favourites: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Product'
+    }
   ],
   createdAt: {
     type: Date,
