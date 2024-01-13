@@ -100,6 +100,7 @@ export class Orders {
 
   static async updateOrder(req: Request, res: Response) {
     const { orderId } = req.params;
+    const { userId } = req.body
 
     try {
       const order: IOrder | null = await Order.findById(orderId);
@@ -108,7 +109,7 @@ export class Orders {
         return res.status(404).json({ message: "Order Not Found" });
       }
 
-      if (order?.user.toString() !== req.body["userId"]) {
+      if (order?.user.toString() !== userId) {
         return res.status(403).json({
           message:
             "Access Denied. You do not have permission to update user's account",
