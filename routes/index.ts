@@ -5,6 +5,7 @@ import { Products } from "../handlers/product";
 import { validateInputData } from "../middlewares/validateInput.middleware";
 import { checkUser } from "../middlewares/userCheck.middleware";
 import { Carts } from "../handlers/cart";
+import { Favourites } from "../handlers/favoruites";
 
 export const route = Router()
 
@@ -42,3 +43,8 @@ route.get('/cart/:id', Carts.getCart)
 route.get('/cart/user/:userId', checkUser, Carts.getUserCart)
 route.patch('/cart/:id', checkUser, validateInputData, Carts.updateCart)
 route.delete('/cart/:id', Carts.deleteCart)
+
+// favourites
+route.post('/favourite', checkUser, Favourites.addToFavourites)
+route.get('/favourite/:userId', checkUser, Favourites.getFavourites)
+route.post('/favourite/:productId', checkUser, Favourites.removeFavourite)
