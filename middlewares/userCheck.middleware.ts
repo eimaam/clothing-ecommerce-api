@@ -5,6 +5,10 @@ export const checkUser = async (req: Request, res: Response, next: NextFunction)
   const { userId } = req.body;
 
   try {
+    if(!userId){
+      return res.status(400).json({success: false, message: "Request body missing userId parameter"})
+    }
+
     const user = await User.findById(userId);
 
     if (!user) {
