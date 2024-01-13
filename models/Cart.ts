@@ -3,16 +3,18 @@ import mongoose, { Schema, Document } from 'mongoose';
 interface CartItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
+  total: number
 }
 
-interface ICart extends Document {
-  user: mongoose.Types.ObjectId;
+export interface ICart extends Document {
+  userId: mongoose.Types.ObjectId;
   items: CartItem[];
+  grandTotal: number
   createdAt: Date;
 }
 
 const cartSchema = new Schema<ICart>({
-  user: {
+  userId: {
     type: Schema.Types.ObjectId,
     ref: 'User', // Reference to the User model
     required: true,
@@ -29,13 +31,22 @@ const cartSchema = new Schema<ICart>({
         required: true,
         min: 1,
       },
+      total: {
+        type: Number,
+        required: true,
+      },
+      
     },
   ],
+  grandTotal: {
+    type: Number, 
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 }, { timestamps: true});
 
-export const Cart = mongoose.model<ICart>('Cart', cartSchema);
+export const Cart = mongoose.models.Cart || mongoose.model<ICart>('Cart', cartSchema);
 
