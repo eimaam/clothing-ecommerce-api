@@ -7,14 +7,14 @@ interface CartItem {
 }
 
 export interface ICart extends Document {
-  userId: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   items: CartItem[];
   grandTotal: number
   createdAt: Date;
 }
 
 const cartSchema = new Schema<ICart>({
-  userId: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: 'User', // Reference to the User model
     required: true,

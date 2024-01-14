@@ -8,7 +8,7 @@ export class Carts {
 
     try {
       const existingCartItem: ICart | null = await Cart.findOne({
-        userId,
+        user: userId,
         "items.product": productId,
       });
 
@@ -50,7 +50,7 @@ export class Carts {
         };
 
         const cart = await Cart.findOneAndUpdate(
-          { userId },
+          { user: userId },
           {
             $push: { items: newCartItem },
             $inc: { grandTotal: newCartItem.total },
@@ -92,7 +92,7 @@ export class Carts {
         });
       }
 
-      if (cartItemToUpdate.userId.toString() !== userId) {
+      if (cartItemToUpdate.user.toString() !== userId) {
         return res.status(403).json({
           success: false,
           message:
@@ -205,9 +205,9 @@ export class Carts {
     const { userId } = req.params;
 
     try {
-      const userCarts: ICart | null = await Cart.findOne({ userId });
+      const userCart: ICart | null = await Cart.findOne({ user: userId }).populate('user') as ICart | null;
 
-      if (!userCarts) {
+      if (!userCart) {
         return res
           .status(404)
           .json({ success: false, message: "User's cart is empty" });
@@ -225,8 +225,8 @@ export class Carts {
       res.status(200).json({
         success: true,
         message: "User's Cart data fetched successfully",
-        total: userCarts.items.length,
-        data: userCarts,
+        total: userCart.items.length,
+        data: userCart,
       });
     } catch (error) {
       console.log("There was a problem getting all carts data/item", error);
@@ -243,7 +243,7 @@ export class Carts {
     const { userId } = req.body;
 
     try {
-      const cart = await Cart.findById(id);
+      const cart:ICart | null = await Cart.findById(id);
 
       if (!cart) {
         return res
@@ -251,7 +251,7 @@ export class Carts {
           .json({ success: false, message: "Cart Not Found", data: cart });
       }
 
-      if (cart.userId.toString() !== userId) {
+      if (cart.user.toString() !== userId) {
         return res.status(403).json({
           success: false,
           message:
