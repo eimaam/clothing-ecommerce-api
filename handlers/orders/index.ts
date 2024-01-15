@@ -9,70 +9,97 @@ export class Orders {
   static async createOrder(req: Request, res: Response) {
     const { userId, productId, quantity, status, shippingType, colour, size } =
       req.body;
-console.log("BODYYYYY ==> ", req.body)
+    console.log("BODYYYYY ==> ", req.body);
     try {
-      const existingOrder:IOrder | null = await Order.findOne({ user: userId })
+      const existingOrder: IOrder | null = await Order.findOne({
+        user: userId,
+      });
 
       const product: IProduct | null = await Product.findById(productId);
 
       if (!product) {
-        return res.status(404).json({ message: "Product/Item not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Product/Item not found" });
       }
 
       if (quantity > product.availability)
         return res.status(400).json({
-      success: false,
-          message: "Invalid quantity! Item available is below the entered quantity",
+          success: false,
+          message:
+            "Invalid quantity! Item available is below the entered quantity",
         });
 
-      if(existingOrder){
+      if (existingOrder) {
         existingOrder.items.forEach((item) => {
-          if(item.product.toString() === productId && status === Status.PENDING){
-            if(item.colour === colour || item.size === size){
-              item.quantity += quantity
-              item.total = item.quantity * product.price
+          if (
+            item.product.toString() === productId &&
+            status === Status.PENDING
+          ) {
+            if (item.colour === colour || item.size === size) {
+              item.quantity += quantity;
+              item.total = item.quantity * product.price;
             }
           }
-        })
+        });
 
-        await existingOrder.save()
+        await existingOrder.save();
 
-        return res.status(201).json( { success: true, message: 'Order created successfully', data: existingOrder})
+        return res
+          .status(201)
+          .json({
+            success: true,
+            message: "Order created successfully",
+            data: existingOrder,
+          });
       }
 
       const newOrder = {
-        items: 
-          {
-            product: new mongoose.Types.ObjectId(productId),
-            quantity,
-            colour,
-            size,
-            total: quantity * product.price,
-            status,
-            shippingType,
-          },
+        items: {
+          product: new mongoose.Types.ObjectId(productId),
+          quantity,
+          colour,
+          size,
+          total: quantity * product.price,
+          status,
+          shippingType,
+        },
       };
 
-      const order = await Order.findOneAndUpdate({user: userId}, {$push: newOrder }, { new: true, upsert: true });
+      const order = await Order.findOneAndUpdate(
+        { user: userId },
+        { $push: newOrder },
+        { new: true, upsert: true },
+      );
 
       if (order) {
         await Product.findByIdAndUpdate(
           { _id: productId },
-          { $inc: { availability: -quantity } }
+          { $inc: { availability: -quantity } },
         );
       }
 
       await User.findOneAndUpdate(
         { _id: userId },
-        { $addToSet: { orders: order._id } }
+        { $addToSet: { orders: order._id } },
       );
 
       return res
         .status(201)
-        .json({ message: "New Order created successfully", order });
-    } catch (error) {
+        .json({
+          success: true,
+          message: "New Order created successfully",
+          data: order,
+        });
+    } catch (error: any) {
       console.log("Error creating order", error);
-      res.status(500).json({ message: "Internal Server Error", error });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Internal Server Error",
+          error: error?.message,
+        });
     }
   }
 
@@ -83,12 +110,10 @@ console.log("BODYYYYY ==> ", req.body)
       const order: IOrder | null = await Order.findById(orderId);
 
       if (!order) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "No Order Found with the supplied ID",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "No Order Found with the supplied ID",
+        });
       }
 
       res
@@ -97,6 +122,7 @@ console.log("BODYYYYY ==> ", req.body)
     } catch (error) {
       console.error("Error getting order", error);
       res.status(500).json({
+        success: false,
         message: "Internal Server Error. Order fetching failed",
         error,
       });
@@ -112,7 +138,7 @@ console.log("BODYYYYY ==> ", req.body)
       if (!userOrders.length) {
         return res
           .status(400)
-          .json({ success: false, message: "User has no order" });
+          .json({ success: false, message: "User has no orders" });
       }
 
       // Additional check to ensure the userId matches
@@ -124,10 +150,13 @@ console.log("BODYYYYY ==> ", req.body)
         });
       }
 
-      res.status(200).json({ message: "Order fetched", userOrders });
+      res
+        .status(200)
+        .json({ success: true, message: "Order fetched", userOrders });
     } catch (error) {
       console.error("Error getting order", error);
       res.status(500).json({
+        success: false,
         message: "Internal Server Error. Order fetching failed",
         error,
       });
@@ -139,15 +168,20 @@ console.log("BODYYYYY ==> ", req.body)
       const orders = await Order.find();
 
       if (!orders.length) {
-        return res.status(400).json({ message: "NO USER CREATED" });
+        return res
+          .status(400)
+          .json({ success: false, message: "NO USER CREATED" });
       }
       res.status(200).json({
+        success: true,
         message: "All orders fetched successfully",
         "total orders": orders?.length,
         orders,
       });
     } catch (error) {
-      res.status(500).json({ message: "Internal Server Error" });
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
   }
 
@@ -159,7 +193,9 @@ console.log("BODYYYYY ==> ", req.body)
       const order: IOrder | null = await Order.findById(orderId);
 
       if (!order) {
-        return res.status(404).json({ message: "Order Not Found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Order Not Found" });
       }
 
       if (order?.user.toString() !== userId) {
@@ -169,11 +205,13 @@ console.log("BODYYYYY ==> ", req.body)
         });
       }
       const product: IProduct | null = await Product.findById(
-        order.items[0].product
+        order.items[0].product,
       );
 
       if (req.body["productId"] && !product) {
-        return res.status(404).json({ message: "product not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "product not found" });
       }
 
       const data: { [key: string]: string | number | object } = {};
@@ -251,10 +289,16 @@ console.log("BODYYYYY ==> ", req.body)
 
       res
         .status(200)
-        .json({ message: "Order updated successfully", order: updatedOrder });
+        .json({
+          success: true,
+          message: "Order updated successfully",
+          order: updatedOrder,
+        });
     } catch (error: any) {
       console.error("Error updating order", error);
-      res.status(500).json({ message: "Error updating order", error });
+      res
+        .status(500)
+        .json({ success: false, message: "Error updating order", error });
     }
   }
 
@@ -265,21 +309,27 @@ console.log("BODYYYYY ==> ", req.body)
       const order = await Order.findById(orderId);
 
       if (!order) {
-        return res.status(403).json({ message: "Order not found" });
+        return res
+          .status(403)
+          .json({ success: false, message: "Order not found" });
       }
 
       if (order.user?.toString() !== userId) {
         return res.status(403).json({
+          success: false,
           message: "You do not have permission to execute this action",
         });
       }
 
       await Order.findByIdAndDelete(orderId);
 
-      res.status(200).json({ message: "Order deleted successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "Order deleted successfully" });
     } catch (error) {
       console.error("Error deleting order", error);
       res.status(500).json({
+        success: false,
         message:
           "Internal Server Error. There was a problem executing delete order action",
       });

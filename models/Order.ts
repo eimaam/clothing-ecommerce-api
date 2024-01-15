@@ -7,17 +7,16 @@ interface OrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
   size: SizeEnum | number;
-  colour: string,
+  colour: string;
   total: number;
   status: string;
   shippingType: ShippingType;
 }
 
-
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   items: OrderItem[];
-  
+
   createdAt: Date;
 }
 
@@ -39,10 +38,11 @@ const orderSchema = new Schema<IOrder>({
         required: true,
         min: 1,
         validate: {
-          validator: function(this: OrderItem, value: any): Promise<boolean> {
+          validator: function (this: OrderItem, value: any): Promise<boolean> {
             return validateQuantity.call(this, value);
           },
-          message: 'Invalid quantity - confirm quantity is not greater than availability',
+          message:
+            "Invalid quantity - confirm quantity is not greater than availability",
         },
       },
       colour: {
@@ -50,20 +50,20 @@ const orderSchema = new Schema<IOrder>({
         required: true,
         lowercase: true,
         validate: {
-          validator: function(this: OrderItem, value: any): Promise<boolean> {
+          validator: function (this: OrderItem, value: any): Promise<boolean> {
             return validateColor.call(this, value);
           },
-          message: 'Invalid color',
+          message: "Invalid color",
         },
       },
       size: {
         type: Schema.Types.Mixed,
         required: true,
         validate: {
-          validator: function(this: OrderItem, value: any): Promise<boolean> {
+          validator: function (this: OrderItem, value: any): Promise<boolean> {
             return validateSize.call(this, value);
           },
-          message: 'Invalid size',
+          message: "Invalid size",
         },
       },
       total: {
@@ -79,7 +79,7 @@ const orderSchema = new Schema<IOrder>({
       shippingType: {
         type: String,
         required: true,
-        enum: ["in_store", "standard",  "express"],
+        enum: ["in_store", "standard", "express"],
         default: ShippingType.IN_STORE,
       },
     },
@@ -92,7 +92,9 @@ const orderSchema = new Schema<IOrder>({
 
 // Custom validation function for color
 async function validateColor(this: OrderItem, value: any): Promise<boolean> {
-  const product = await mongoose.model<IProduct>("Product").findById(this.product);
+  const product = await mongoose
+    .model<IProduct>("Product")
+    .findById(this.product);
 
   if (!product) {
     // Handle the case when the product is not found
@@ -104,7 +106,9 @@ async function validateColor(this: OrderItem, value: any): Promise<boolean> {
 
 // Custom validation function for size
 async function validateSize(this: OrderItem, value: any): Promise<boolean> {
-  const product = await mongoose.model<IProduct>("Product").findById(this.product);
+  const product = await mongoose
+    .model<IProduct>("Product")
+    .findById(this.product);
 
   if (!product) {
     return false;
@@ -116,7 +120,9 @@ async function validateSize(this: OrderItem, value: any): Promise<boolean> {
 // custom validation for quantity
 // ensure quantity passed correlates with the available items to avoid ordering whats not available
 async function validateQuantity(this: OrderItem, value: any): Promise<boolean> {
-  const product = await mongoose.model<IProduct>("Product").findById(this.product);
+  const product = await mongoose
+    .model<IProduct>("Product")
+    .findById(this.product);
 
   if (!product) {
     return false;

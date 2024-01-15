@@ -28,13 +28,16 @@ export class Products {
       };
 
       if (!images.length) {
-        return res.status(400).json({ message: "Product/Item missing images" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Product/Item missing images" });
       }
 
       const product = await Product.create(newProduct);
 
       res.status(201).json({
         status: "ok",
+        success: false,
         message: `Item successfully added to ${mainCategory}`,
         product,
       });
@@ -42,7 +45,11 @@ export class Products {
       console.error("Server err", error);
       res
         .status(500)
-        .json({ message: "There was a problem creating product", error });
+        .json({
+          success: false,
+          message: "There was a problem creating product",
+          error,
+        });
     }
   }
 
@@ -53,13 +60,23 @@ export class Products {
       const product = await Product.findById(productId);
 
       if (!product) {
-        return res.status(400).json({ message: "Product not found" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Product not found" });
       }
 
-      res.status(200).json({ message: "Product/Item fetched", product });
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Product/Item fetched",
+          data: product,
+        });
     } catch (error) {
       console.error("Error gettiing product/item");
-      res.status(500).json({ message: "Internal Server Error.", error });
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error.", error });
     }
   }
 
@@ -68,17 +85,22 @@ export class Products {
       const products = await Product.find();
 
       if (!products.length) {
-        return res.status(400).json({ message: "NO PRODUCT/ITEM ADDED" });
+        return res
+          .status(400)
+          .json({ success: false, message: "NO PRODUCT/ITEM ADDED" });
       }
 
       res.status(200).json({
+        success: true,
         message: "All products/items fetched",
         "total products": products.length,
         products,
       });
     } catch (error) {
       console.error("Error gettiing all products/items");
-      res.status(500).json({ message: "Internal Server Error.", error });
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error.", error });
     }
   }
 
@@ -123,10 +145,15 @@ export class Products {
 
       res
         .status(200)
-        .json({ message: "Product/Item updated successfully", updatedProduct });
+        .json({
+          success: true,
+          message: "Product/Item updated successfully",
+          updatedProduct,
+        });
     } catch (error) {
       console.error("Error updating product/item", error);
       res.status(500).json({
+        success: false,
         message: "Internal Server Error. Failed to update Product/Item",
         error,
       });

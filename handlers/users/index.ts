@@ -7,7 +7,9 @@ export class Users {
     const { email, password, fullName } = req.body;
 
     if (!email || !password || !fullName) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res
+        .status(400)
+        .json({ success: true, message: "All fields are required." });
     }
 
     try {
@@ -20,31 +22,59 @@ export class Users {
       const existingUser = await User.findOne({ email });
 
       if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
+        return res
+          .status(400)
+          .json({ success: false, message: "User already exists" });
       }
 
       const user = await User.create(userData);
 
-      res.status(201).json({ message: "Account created successfully", user });
-    } catch (error) {
-      res.status(500).json({ message: "Error creating new user", error });
+      res
+        .status(201)
+        .json({
+          success: true,
+          message: "Account created successfully",
+          data: user,
+        });
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Error creating new user",
+          error: error?.message,
+        });
     }
   }
 
   static async getUserById(req: Request, res: Response) {
     const { userId } = req.params;
     try {
-      const user = await User.findById(userId).populate('favourites').populate('orders');
+      const user = await User.findById(userId)
+        .populate("favourites")
+        .populate("orders");
 
       if (!user) {
-        return res.status(404).json({ message: "User not found", userId });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found", data: userId });
       }
 
-      res.status(200).json({ message: "User fetched successfully", user });
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "User fetched successfully",
+          data: user,
+        });
     } catch (error) {
       res
         .status(500)
-        .json({ message: "Error getting User. Internal Server Error", error });
+        .json({
+          success: false,
+          message: "Error getting User. Internal Server Error",
+          error,
+        });
     }
   }
 
@@ -53,7 +83,9 @@ export class Users {
       const users = await User.find();
 
       if (users.length === 0) {
-        return res.status(400).json({ message: "NO USER CREATED" });
+        return res
+          .status(400)
+          .json({ success: false, message: "NO USER CREATED" });
       }
 
       res.status(200).json({
@@ -62,23 +94,25 @@ export class Users {
         users,
       });
     } catch (error) {
-      res.status(500).json({ message: "Internal Server Error" });
+      console.log("Failed to fetched all accounts: ", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
   }
 
   static async updateUser(req: Request, res: Response) {
-    const { id } = req.params;
+    const { userId } = req.params;
 
     try {
-      const user = await User.findById(id);
+      const user = await User.findById(userId);
 
       if (user?._id.toString() !== req.body["userId"]) {
-        return res
-          .status(403)
-          .json({
-            message:
-              "Access Denied. You do not have permission to update User's account",
-          });
+        return res.status(403).json({
+          sucess: false,
+          message:
+            "Access Denied. You do not have permission to update User's account",
+        });
       }
 
       let hashedPassword;
@@ -126,19 +160,27 @@ export class Users {
         {
           new: true,
           runValidators: true,
-        }
+        },
       );
 
       if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       return res
         .status(200)
-        .json({ message: "User updated successfully", user: updatedUser });
+        .json({
+          success: true,
+          message: "User updated successfully",
+          user: updatedUser,
+        });
     } catch (error) {
       console.error("Error updating user account", error);
-      res.status(500).json({ message: "Internal Server Error", error });
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error", error });
     }
   }
 
@@ -149,15 +191,25 @@ export class Users {
       const user = await User.findById({ _id: userId });
 
       if (!user) {
-        return res.status(404).json({ message: "User/Account not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User/Account not found" });
       }
       res
         .status(204)
-        .json({ message: "Account deleted successfully", account: user });
+        .json({
+          success: true,
+          message: "Account deleted successfully",
+          account: user,
+        });
     } catch (error) {
       res
         .status(500)
-        .json({ message: "There was an error deleting account", error });
+        .json({
+          success: false,
+          message: "There was an error deleting account",
+          error,
+        });
     }
   }
 }

@@ -31,7 +31,7 @@ export class Carts {
 
         existingCartItem.grandTotal = existingCartItem.items.reduce(
           (total, item) => total + item.total,
-          0
+          0,
         );
 
         await existingCartItem.save();
@@ -55,7 +55,7 @@ export class Carts {
             $push: { items: newCartItem },
             $inc: { grandTotal: newCartItem.total },
           },
-          { new: true, upsert: true }
+          { new: true, upsert: true },
         );
 
         return res.status(200).json({
@@ -122,7 +122,7 @@ export class Carts {
 
       cartItemToUpdate.grandTotal = cartItemToUpdate.items.reduce(
         (total, item) => total + item.total,
-        0
+        0,
       );
 
       let updatedCart;
@@ -205,7 +205,9 @@ export class Carts {
     const { userId } = req.params;
 
     try {
-      const userCart: ICart | null = await Cart.findOne({ user: userId }).populate('user') as ICart | null;
+      const userCart: ICart | null = (await Cart.findOne({
+        user: userId,
+      }).populate("user")) as ICart | null;
 
       if (!userCart) {
         return res
@@ -243,7 +245,7 @@ export class Carts {
     const { userId } = req.body;
 
     try {
-      const cart:ICart | null = await Cart.findById(id);
+      const cart: ICart | null = await Cart.findById(id);
 
       if (!cart) {
         return res

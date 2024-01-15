@@ -85,8 +85,8 @@ const userSchema = new Schema<IUser>({
   favourites: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'Product'
-    }
+      ref: "Product",
+    },
   ],
   createdAt: {
     type: Date,

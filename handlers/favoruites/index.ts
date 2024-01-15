@@ -16,7 +16,7 @@ export class Favourites {
       const user: IUser | null = await User.findByIdAndUpdate(
         { _id: userId },
         { $addToSet: { favourites: productId } },
-        { new: true }
+        { new: true },
       );
 
       return res.status(200).json({
@@ -57,7 +57,7 @@ export class Favourites {
     } catch (error: any) {
       console.error(
         "There was a problem getting User's favourites list",
-        error
+        error,
       );
       res.status(500).json({
         success: false,
@@ -75,7 +75,7 @@ export class Favourites {
       const user = await User.findByIdAndUpdate(
         { _id: userId },
         { $pull: { favourites: productId } },
-        { new: true }
+        { new: true },
       );
 
       res.status(200).json({
@@ -84,7 +84,10 @@ export class Favourites {
         data: { user: user._id, favourites: user.favourites },
       });
     } catch (error: any) {
-      console.error("There was a problem removing item from favourites list: ", error);
+      console.error(
+        "There was a problem removing item from favourites list: ",
+        error,
+      );
       res.status(500).json({
         success: false,
         message: "There was a problem removing item from favourites list",

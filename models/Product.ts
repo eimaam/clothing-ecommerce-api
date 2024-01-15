@@ -35,7 +35,7 @@ const productSchema = new Schema<IProduct>(
     },
     price: {
       type: Number,
-      required: true
+      required: true,
     },
     colours: {
       type: [String],
@@ -44,7 +44,7 @@ const productSchema = new Schema<IProduct>(
       type: Number,
       required: true,
       min: 0,
-      default: 1
+      default: 1,
     },
     category: {
       type: {
@@ -63,15 +63,15 @@ const productSchema = new Schema<IProduct>(
       required: true,
     },
     images: {
-        type: [String],
-        required: true
+      type: [String],
+      required: true,
     },
     createdAt: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Product =
