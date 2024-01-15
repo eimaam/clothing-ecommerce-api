@@ -34,7 +34,7 @@ export class Users {
   static async getUserById(req: Request, res: Response) {
     const { userId } = req.params;
     try {
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).populate('favourites').populate('orders');
 
       if (!user) {
         return res.status(404).json({ message: "User not found", userId });

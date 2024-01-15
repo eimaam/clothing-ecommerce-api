@@ -3,13 +3,16 @@ import { IOrder, Order } from "../../models/Order";
 import { IProduct, Product } from "../../models/Product";
 import mongoose from "mongoose";
 import { User } from "../../models/User";
+import { Status } from "../../types";
 
 export class Orders {
   static async createOrder(req: Request, res: Response) {
     const { userId, productId, quantity, status, shippingType, colour, size } =
       req.body;
-
+console.log("BODYYYYY ==> ", req.body)
     try {
+      const existingOrder:IOrder | null = await Order.findOne({ user: userId })
+
       const product: IProduct | null = await Product.findById(productId);
 
       if (!product) {
@@ -18,25 +21,39 @@ export class Orders {
 
       if (quantity > product.availability)
         return res.status(400).json({
-          message: "Invalid quantity. Quantity above available product/item",
+      success: false,
+          message: "Invalid quantity! Item available is below the entered quantity",
         });
 
+      if(existingOrder){
+        existingOrder.items.forEach((item) => {
+          if(item.product.toString() === productId && status === Status.PENDING){
+            if(item.colour === colour || item.size === size){
+              item.quantity += quantity
+              item.total = item.quantity * product.price
+            }
+          }
+        })
+
+        await existingOrder.save()
+
+        return res.status(201).json( { success: true, message: 'Order created successfully', data: existingOrder})
+      }
+
       const newOrder = {
-        user: new mongoose.Types.ObjectId(userId),
-        items: [
+        items: 
           {
             product: new mongoose.Types.ObjectId(productId),
             quantity,
             colour,
             size,
+            total: quantity * product.price,
+            status,
+            shippingType,
           },
-        ],
-        total: quantity * product.price,
-        status,
-        shippingType,
       };
 
-      const order = await Order.create(newOrder);
+      const order = await Order.findOneAndUpdate({user: userId}, {$push: newOrder }, { new: true, upsert: true });
 
       if (order) {
         await Product.findByIdAndUpdate(
@@ -47,10 +64,10 @@ export class Orders {
 
       await User.findOneAndUpdate(
         { _id: userId },
-        { $push: { orders: order._id } }
+        { $addToSet: { orders: order._id } }
       );
 
-      res
+      return res
         .status(201)
         .json({ message: "New Order created successfully", order });
     } catch (error) {

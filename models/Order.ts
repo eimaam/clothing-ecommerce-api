@@ -7,16 +7,17 @@ interface OrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
   size: SizeEnum | number;
-  colour: string
+  colour: string,
+  total: number;
+  status: string;
+  shippingType: ShippingType;
 }
 
 
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   items: OrderItem[];
-  total: number;
-  status: string;
-  shippingType: ShippingType;
+  
   createdAt: Date;
 }
 
@@ -64,25 +65,25 @@ const orderSchema = new Schema<IOrder>({
           },
           message: 'Invalid size',
         },
-      }
+      },
+      total: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "shipped", "delivered", "cancelled"],
+        default: "pending",
+      },
+      shippingType: {
+        type: String,
+        required: true,
+        enum: ["in_store", "standard",  "express"],
+        default: ShippingType.IN_STORE,
+      },
     },
   ],
-  total: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "shipped", "delivered", "cancelled"],
-    default: "pending",
-  },
-  shippingType: {
-    type: String,
-    required: true,
-    enum: ["in_store", "standard",  "express"],
-    default: ShippingType.IN_STORE,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
