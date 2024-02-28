@@ -5,7 +5,7 @@ import { Products } from "../handlers/product";
 import { validateInputData } from "../middlewares/validateInput.middleware";
 import { checkUser } from "../middlewares/userCheck.middleware";
 import { Carts } from "../handlers/cart";
-import { Favourites } from "../handlers/favoruites";
+import { Favourites } from "../handlers/favourites";
 
 export const route = Router();
 
